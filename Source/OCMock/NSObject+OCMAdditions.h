@@ -3,11 +3,10 @@
 //  Copyright (c) 2013 by Mulle Kybernetik. See License file for details.
 //---------------------------------------------------------------------------------------
 
-#import <SenTestingKit/SenTestingKit.h>
+#import <Foundation/Foundation.h>
 
-@interface OCMockObjectPartialMocksTests : SenTestCase
-{
-    int numKVOCallbacks;
-}
+@interface NSObject(OCMAdditions)
+
++ (IMP)instanceMethodForwarderForSelector:(SEL)aSelector;
 
 @end
