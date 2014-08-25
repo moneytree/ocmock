@@ -33,7 +33,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "D31108AC1828DB8700737925"
-               BuildableName = "OCMockLibTests.octest"
+               BuildableName = "OCMockLibTests.xctest"
                BlueprintName = "OCMockLibTests"
                ReferencedContainer = "container:OCMock.xcodeproj">
             </BuildableReference>
