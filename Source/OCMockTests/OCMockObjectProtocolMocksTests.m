@@ -1,10 +1,21 @@
-//---------------------------------------------------------------------------------------
-//  $Id$
-//  Copyright (c) 2013 by Mulle Kybernetik. See License file for details.
-//---------------------------------------------------------------------------------------
+/*
+ *  Copyright (c) 2013-2014 Erik Doernenburg and contributors
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may
+ *  not use these files except in compliance with the License. You may obtain
+ *  a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ *  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ *  License for the specific language governing permissions and limitations
+ *  under the License.
+ */
 
+#import <XCTest/XCTest.h>
 #import <OCMock/OCMock.h>
-#import "OCMockObjectProtocolMocksTests.h"
 
 
 // --------------------------------------------------------------------------------------
@@ -17,7 +28,10 @@
 - (id)objectValue;
 @end
 
-@interface InterfaceForTypedef : NSObject
+@interface InterfaceForTypedef : NSObject {
+    int prop1;
+    NSObject *prop2;
+}
 @end
 
 @implementation InterfaceForTypedef
@@ -33,11 +47,17 @@ typedef InterfaceForTypedef* PointerTypedefInterface;
 @end
 
 
+
+@interface OCMockObjectProtocolMocksTests : XCTestCase
+
+@end
+
+
+@implementation OCMockObjectProtocolMocksTests
+
 // --------------------------------------------------------------------------------------
 //	Tests
 // --------------------------------------------------------------------------------------
-
-@implementation OCMockObjectProtocolMocksTests
 
 - (void)testCanMockFormalProtocol
 {
@@ -52,62 +72,62 @@ typedef InterfaceForTypedef* PointerTypedefInterface;
 - (void)testSetsCorrectNameForProtocolMockObjects
 {
     id mock = [OCMockObject mockForProtocol:@protocol(NSLocking)];
-    STAssertEqualObjects(@"OCMockObject[NSLocking]", [mock description], @"Should have returned correct description.");
+    XCTAssertEqualObjects(@"OCMockObject(NSLocking)", [mock description], @"Should have returned correct description.");
 }
 
 - (void)testRaisesWhenUnknownMethodIsCalledOnProtocol
 {
     id mock = [OCMockObject mockForProtocol:@protocol(NSLocking)];
-    STAssertThrows([mock lowercaseString], @"Should have raised an exception.");
+    XCTAssertThrows([mock lowercaseString], @"Should have raised an exception.");
 }
 
 - (void)testConformsToMockedProtocol
 {
     id mock = [OCMockObject mockForProtocol:@protocol(NSLocking)];
-    STAssertTrue([mock conformsToProtocol:@protocol(NSLocking)], nil);
+    XCTAssertTrue([mock conformsToProtocol:@protocol(NSLocking)]);
 }
 
 - (void)testRespondsToValidProtocolRequiredSelector
 {
     id mock = [OCMockObject mockForProtocol:@protocol(TestProtocol)];
-    STAssertTrue([mock respondsToSelector:@selector(primitiveValue)], nil);
+    XCTAssertTrue([mock respondsToSelector:@selector(primitiveValue)]);
 }
 
 - (void)testRespondsToValidProtocolOptionalSelector
 {
     id mock = [OCMockObject mockForProtocol:@protocol(TestProtocol)];
-    STAssertTrue([mock respondsToSelector:@selector(objectValue)], nil);
+    XCTAssertTrue([mock respondsToSelector:@selector(objectValue)]);
 }
 
 - (void)testDoesNotRespondToInvalidProtocolSelector
 {
     id mock = [OCMockObject mockForProtocol:@protocol(TestProtocol)];
-    STAssertFalse([mock respondsToSelector:@selector(fooBar)], nil);
+    XCTAssertFalse([mock respondsToSelector:@selector(testDoesNotRespondToInvalidProtocolSelector)]);
 }
 
 - (void)testWithTypedefReturnType {
     id mock = [OCMockObject mockForProtocol:@protocol(ProtocolWithTypedefs)];
-    STAssertNoThrow([[[mock stub] andReturn:[TypedefInterface new]] typedefReturnValue1], @"Should accept a typedefed return-type");
-    STAssertNoThrow([mock typedefReturnValue1], @"bla");
+    XCTAssertNoThrow([[[mock stub] andReturn:[TypedefInterface new]] typedefReturnValue1], @"Should accept a typedefed return-type");
+    XCTAssertNoThrow([mock typedefReturnValue1]);
 }
 
 - (void)testWithTypedefPointerReturnType {
     id mock = [OCMockObject mockForProtocol:@protocol(ProtocolWithTypedefs)];
-    STAssertNoThrow([[[mock stub] andReturn:[TypedefInterface new]] typedefReturnValue2], @"Should accept a typedefed return-type");
-    STAssertNoThrow([mock typedefReturnValue2], @"bla");
+    XCTAssertNoThrow([[[mock stub] andReturn:[TypedefInterface new]] typedefReturnValue2], @"Should accept a typedefed return-type");
+    XCTAssertNoThrow([mock typedefReturnValue2]);
 }
 
 - (void)testWithTypedefParameter {
     id mock = [OCMockObject mockForProtocol:@protocol(ProtocolWithTypedefs)];
-    STAssertNoThrow([[mock stub] typedefParameter:nil], @"Should accept a typedefed parameter-type");
-    STAssertNoThrow([mock typedefParameter:nil], @"bla");
+    XCTAssertNoThrow([[mock stub] typedefParameter:nil], @"Should accept a typedefed parameter-type");
+    XCTAssertNoThrow([mock typedefParameter:nil]);
 }
 
 
 - (void)testReturnDefaultValueWhenUnknownMethodIsCalledOnNiceProtocolMock
 {
     id mock = [OCMockObject niceMockForProtocol:@protocol(TestProtocol)];
-    STAssertTrue(0 == [mock primitiveValue], @"Should return 0 on unexpected method call (for nice mock).");
+    XCTAssertTrue(0 == [mock primitiveValue], @"Should return 0 on unexpected method call (for nice mock).");
     [mock verify];
 }
 
@@ -115,7 +135,7 @@ typedef InterfaceForTypedef* PointerTypedefInterface;
 {
     id mock = [OCMockObject niceMockForProtocol:@protocol(TestProtocol)];
     [[mock expect] primitiveValue];
-    STAssertThrows([mock verify], @"Should have raised an exception because method was not called.");
+    XCTAssertThrows([mock verify], @"Should have raised an exception because method was not called.");
 }
 
 @end
