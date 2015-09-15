@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2014 Erik Doernenburg and contributors
+ *  Copyright (c) 2014-2015 Erik Doernenburg and contributors
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may
  *  not use these files except in compliance with the License. You may obtain
@@ -31,6 +31,21 @@
 - (NSString *)stringValue
 {
     return @"FOO";
+}
+
+@end
+
+
+@interface TestClassWithDecimalReturnMethod : NSObject
+
+- (NSDecimalNumber*)method;
+
+@end
+
+@implementation TestClassWithDecimalReturnMethod
+
+- (NSDecimalNumber*)method {
+    return nil;
 }
 
 @end
@@ -351,5 +366,12 @@
     OCMVerify([mock foo]);
 }
 
+
+- (void)testCanUseMacroToStubMethodWithDecimalReturnValue
+{
+    id mock = OCMClassMock([TestClassWithDecimalReturnMethod class]);
+    OCMStub([mock method]).andReturn([NSDecimalNumber decimalNumberWithDecimal:[@0 decimalValue]]);
+    XCTAssertEqualObjects([mock method], [NSDecimalNumber decimalNumberWithDecimal:[@0 decimalValue]]);
+}
 
 @end
