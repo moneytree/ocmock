@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2004-2014 Erik Doernenburg and contributors
+ *  Copyright (c) 2004-2015 Erik Doernenburg and contributors
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may
  *  not use these files except in compliance with the License. You may obtain
@@ -492,8 +492,16 @@ static NSString *TestNotification = @"TestNotification";
     "::DefaultDeleter<GURL> >={scoped_ptr_impl<GURL, base::DefaultDeleter<GURL"
     "> >={Data=^{GURL}}}}}";
 
+    const char *type3 =
+    "r^{GURL}";
+
     OCMBoxedReturnValueProvider *boxed = [OCMBoxedReturnValueProvider new];
     XCTAssertTrue([boxed isMethodReturnType:type1 compatibleWithValueType:type2]);
+    XCTAssertTrue([boxed isMethodReturnType:type1 compatibleWithValueType:type3]);
+    XCTAssertTrue([boxed isMethodReturnType:type2 compatibleWithValueType:type1]);
+    XCTAssertTrue([boxed isMethodReturnType:type2 compatibleWithValueType:type3]);
+    XCTAssertTrue([boxed isMethodReturnType:type3 compatibleWithValueType:type1]);
+    XCTAssertTrue([boxed isMethodReturnType:type3 compatibleWithValueType:type2]);
 }
 
 - (void)testReturnsStubbedNilReturnValue
@@ -824,6 +832,15 @@ static NSString *TestNotification = @"TestNotification";
 	XCTAssertThrows([mock uppercaseString], @"Should have complained about wrong sequence.");
 }
 
+- (void)testRejectThenExpectWithExpectationOrdering
+{
+    [mock setExpectationOrderMatters:YES];
+    [[mock reject] lowercaseString];
+    [[mock expect] uppercaseString];
+    XCTAssertNoThrow([mock uppercaseString], @"Since lowercaseString should be rejected, we shouldn't expect it to be called before uppercaseString.");
+}
+
+
 
 // --------------------------------------------------------------------------------------
 //	nice mocks don't complain about unknown methods, unless told to
@@ -902,6 +919,19 @@ static NSString *TestNotification = @"TestNotification";
 	[[mock expect] lowercaseString];
 	[mock lowercaseString];
 	[mock expect];
+}
+
+
+- (void)testArgumentConstraintsAreOnlyCalledAsOftenAsTheMethodIsCalled
+{
+    __block int count = 0;
+
+    [[mock stub] hasSuffix:[OCMArg checkWithBlock:^(id value) { count++; return YES; }]];
+
+    [mock hasSuffix:@"foo"];
+    [mock hasSuffix:@"bar"];
+
+    XCTAssertEqual(2, count, @"Should have evaluated constraint only twice");
 }
 
 
